@@ -2,9 +2,11 @@ package com.luckyluke.luckRpc.service;
 
 import com.luckyluke.luckRpc.exception.NullServiceException;
 import com.luckyluke.luckRpc.service.RpcService;
+import com.luckyluke.luckRpc.zookeeper.MyZookeeperConfig;
 import lombok.extern.slf4j.Slf4j;
 //import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
