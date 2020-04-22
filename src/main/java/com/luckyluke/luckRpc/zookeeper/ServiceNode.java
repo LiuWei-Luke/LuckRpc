@@ -5,4 +5,7 @@ public class ServiceNode extends AbstractZookeeperNode {
         super(serviceImp, serviceName, address, port);
     }
 
+    public ServiceNode() {
+        super();
+    }
 }

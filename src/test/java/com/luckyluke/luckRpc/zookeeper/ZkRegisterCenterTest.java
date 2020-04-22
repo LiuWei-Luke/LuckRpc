@@ -24,7 +24,6 @@ public class ZkRegisterCenterTest {
         ZkRegisterCenter.setZkAddress("127.0.0.1:2181");
         zkRegisterCenter = ZkRegisterCenter.getInstance();
         zkRegisterCenter.connect();
-        ZkRegisterCenter.setEncoder(new NodeEncoder(ServiceNode.class));
     }
 
     @Test
@@ -38,7 +37,7 @@ public class ZkRegisterCenterTest {
         boolean t = zkRegisterCenter.setNode(path, node);
         System.out.println("注册服务结果: " + t);
 
-        String nodeData = (String) zkRegisterCenter.getNode(path);
+        ServiceNode nodeData = zkRegisterCenter.getNode(path);
         System.out.println("获取节点数据成功：" + nodeData);
         Assert.assertNotNull(nodeData);
     }

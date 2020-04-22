@@ -29,7 +29,8 @@ public class ZkRegisterCenter implements RegisterCenter {
     private static CuratorFramework client;
     protected static String zkAddress;
     protected static int timeout = 3000;
-    protected static NodeEncoder encoder;
+    protected static NodeSerialization nodeSerialization;
+
     /**
      *   重试机制
      */
@@ -37,6 +38,7 @@ public class ZkRegisterCenter implements RegisterCenter {
 
     private ZkRegisterCenter() {
         retryPolicy = new ExponentialBackoffRetry(1000, 3);
+        nodeSerialization = new NodeSerialization(ServiceNode.class);
     }
 
 
@@ -49,9 +51,9 @@ public class ZkRegisterCenter implements RegisterCenter {
     }
 
     @Override
-    public Object getNode(String path) throws Exception {
+    public ServiceNode getNode(String path) throws Exception {
         if (isConnected()) {
-            return new String(client.getData().forPath(path));
+            return (ServiceNode) nodeSerialization.decode(client.getData().forPath(path));
         }
 
         return null;
@@ -66,13 +68,14 @@ public class ZkRegisterCenter implements RegisterCenter {
     @Override
     public boolean setNode(String path, ServiceNode nodeData) throws Exception {
         if (isConnected()) {
-            if (!nodeExists(path)) {
-                log.info("创建节点:" + path);
-                client.create()
-                        .withMode(CreateMode.EPHEMERAL)
-                        .forPath(path, encoder.encode(nodeData));
-                return true;
+            if (nodeExists(path)) {
+                removeNode(path);
             }
+            log.info("创建节点:" + path);
+            client.create()
+                    .withMode(CreateMode.EPHEMERAL)
+                    .forPath(path, nodeSerialization.encode(nodeData));
+            return true;
         }
 
         return false;
@@ -82,7 +85,7 @@ public class ZkRegisterCenter implements RegisterCenter {
         return null;
     }
 
-    protected void connect() {
+    public void connect() {
         if (zkAddress == null) {
             throw new NullPointerException("请设置Zookeeper地址");
         }
@@ -132,13 +135,12 @@ public class ZkRegisterCenter implements RegisterCenter {
 
         Stat stat = client.checkExists().forPath(path);
         boolean isExists = stat != null;
-        System.out.println("节点" + path + "是否存在:" + isExists);
+        log.info("节点" + path + "是否存在:" + isExists);
         return isExists;
     }
 
-    public static void setEncoder(NodeEncoder encoder) {
-        ZkRegisterCenter.encoder = encoder;
+    public void removeNode(String path) throws Exception {
+        log.info("尝试移除节点 {}", path);
+        client.delete().forPath(path);
     }
-
-
 }

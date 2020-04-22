@@ -15,6 +15,9 @@ public abstract class AbstractZookeeperNode implements Serializable {
         this.port = port;
     }
 
+    public AbstractZookeeperNode() {
+    }
+
     public Class<?> getServiceImp() {
         return serviceImp;
     }
